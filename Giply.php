@@ -14,20 +14,16 @@ class Giply
     const LOG_INFO = 'INFO';
 
     /**
-     * A callback function to call after the deploy has finished.
-     *
-     * @var callback
-     */
-    public $post_deploy;
-
-    /**
      * The name of the file that will be used for logging deployments. Set to FALSE to disable logging.
      *
      * @var string
      */
     private $log = 'deployments.log';
 
-
+    /**
+     * Resource to the temp file where logs are stored until they are written at the end of the pull
+     * @var null|resource
+     */
     private $logHandle = null;
 
     /**
@@ -60,7 +56,12 @@ class Giply
      */
     private $directory;
 
-    private $exec;
+    /**
+     * List of executable commands to be run after the repo has been updated
+     *
+     * @var array
+     */
+    private $post_exec = array();
 
     /**
      * Sets up defaults.
@@ -97,7 +98,7 @@ class Giply
     /**
      * Executes the necessary commands to deploy the website.
      */
-    public function execute()
+    public function pull()
     {
         try {
             // Make sure we're in the right directory
@@ -131,17 +132,13 @@ class Giply
                 $this->log("Composer output: " . implode(' ', $output));
             }
 
-            if ($this->exec) {
-
-                foreach ($this->exec as $exec) {
-                    $this->log("Executing ($i): $exec", self::LOG_DEBUG);
-                    exec($exec);
+            if ($this->post_exec) {
+                foreach ($this->post_exec as $post_exec) {
+                    $this->log("Executing ($i): $post_exec", self::LOG_DEBUG);
+                    exec($post_exec);
                     $i++;
                 }
             }
-
-            if (is_callable($this->post_deploy))
-                call_user_func($this->post_deploy);
 
             $this->log('Deployment successful.');
         } catch (Exception $e) {
@@ -176,7 +173,7 @@ class Giply
 
         $this->log("Options: " . print_r($options, true), self::LOG_DEBUG);
 
-        $available_options = array('log', 'date_format', 'branch', 'remote', 'exec');
+        $available_options = array('log', 'date_format', 'branch', 'remote', 'post_exec');
 
         foreach ($options as $option => $value) {
             if (in_array($option, $available_options)) {

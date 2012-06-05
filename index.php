@@ -15,7 +15,7 @@ require __DIR__ . "/Giply.php";
 $action = $project = $hash = null;
 list($action, $project, $hash) = explode('/', substr($_SERVER['REQUEST_URI'], 1));
 
-if (!in_array($action, array('pull', 'refresh'))) {
+if (!in_array($action, array('pull'))) {
     header("400 Invalid action", true, 400);
     exit('Missing action');
 }
@@ -70,13 +70,9 @@ register_shutdown_function(function() use ($lock)
 });
 
 file_put_contents($lock, md5($_POST['payload']));
+file_put_contents("$project_dir/payload.json", $_POST['payload']);
+
 $deploy = new Giply($project_dir);
-
-
 $deploy->log("Payload: " . $_POST['payload'], Giply::LOG_DEBUG);
 
-//$deploy->post_deploy = function() use ($deploy) {
-//    //Any sort of custom logic here!
-//};
-
-$deploy->execute();
+$deploy->$action();
