@@ -76,9 +76,12 @@ class Giply
         $this->directory = realpath($directory) . DIRECTORY_SEPARATOR;
 
         $json = $this->directory . "giply.json";
-        if (is_readable($json)){
+        if (file_exists($json)){
+            $this->log("Overwriting default options", self::LOG_DEBUG);
             $options = array_merge(json_decode(file_get_contents($json)), $options);
         }
+
+        $this->log("Options: " . print_r($options, true), self::LOG_DEBUG);
 
         $available_options = array('log', 'date_format', 'branch', 'remote', 'composer', 'exec');
 
@@ -131,17 +134,21 @@ class Giply
             $this->log('Resetting repository... ' . implode(' ', $output));
 
             // Update the local repository
+            $output = array();
             exec('git pull ' . $this->remote . ' ' . $this->branch, $output);
             $this->log('Pulling in changes... ' . implode(' ', $output));
 
             // Secure the .git directory
+            $output = array();
             exec('chmod -R og-rx .git', $output);
             $this->log('Securing .git directory... ');
 
             if (is_readable($this->directory . "composer.json")) {
+                $output = array();
                 exec("php $this->composer self-update", $output);
                 $this->log("Running composer... ");
 
+                $output = array();
                 if (!file_exists($this->directory . "composer.lock"))
                     exec("php $this->composer install", $output);
                 else
