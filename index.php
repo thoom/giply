@@ -48,7 +48,7 @@ if (!is_dir("$project_dir/.git")) {
 
 $lock = "$project_dir/giply.lock";
 
-set_time_limit(0);
+set_time_limit(120);
 $timeout = 60;
 $i = 0;
 while (file_exists($lock)) {
@@ -64,6 +64,11 @@ while (file_exists($lock)) {
     }
 }
 
+register_shutdown_function(function() use ($lock)
+{
+    unlink($lock);
+});
+
 file_put_contents($lock, md5($_POST['payload']));
 $deploy = new Giply($project_dir);
 
@@ -75,4 +80,3 @@ $deploy->log("Payload: " . $_POST['payload'], Giply::LOG_DEBUG);
 //};
 
 $deploy->execute();
-unset($lock);
