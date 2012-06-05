@@ -19,8 +19,8 @@ class Giply
      * @var callback
      */
     public $post_deploy;
-    
-    
+
+
     private $composer = '/usr/local/bin/composer.phar';
 
     /**
@@ -99,7 +99,7 @@ class Giply
     {
         if ($this->log) {
             // Set the name of the log file
-            $filename = $this->log;
+            $filename = $this->directory . $this->log;
 
             if (!file_exists($filename)) {
                 // Create the log file
@@ -122,8 +122,7 @@ class Giply
     {
         try {
             // Make sure we're in the right directory
-            exec("cd  $this->directory", $output);
-            $this->log('Changing working directory... ' . implode(' ', $output));
+            chdir($this->directory);
 
             // Discard any changes to tracked files since our last deploy
             exec('git reset --hard HEAD', $output);
@@ -137,7 +136,7 @@ class Giply
             exec('chmod -R og-rx .git', $output);
             $this->log('Securing .git directory... ');
 
-            if (is_readable($this->directory ."composer.json")){
+            if (is_readable($this->directory . "composer.json")) {
                 exec("php $this->composer self-update", $output);
 
                 if (!file_exists($this->directory . "composer.lock"))
@@ -146,7 +145,7 @@ class Giply
                     exec("php $this->composer update", $output);
             }
 
-            if ($this->exec){
+            if ($this->exec) {
                 foreach ($this->exec as $exec)
                     exec($exec, $output);
             }
