@@ -20,9 +20,6 @@ class Giply
      */
     public $post_deploy;
 
-
-    private $composer = '/usr/local/bin/composer.phar';
-
     /**
      * The name of the file that will be used for logging deployments. Set to FALSE to disable logging.
      *
@@ -119,14 +116,17 @@ class Giply
             $this->overwriteOptions();
             if (is_readable($this->directory . "composer.json")) {
                 $output = array();
-                exec("php $this->composer self-update", $output);
-                $this->log("Running composer... ");
+                $action = file_exists($this->directory . "composer.lock") ? "update" : "install";
 
-                $output = array();
-                if (!file_exists($this->directory . "composer.lock"))
-                    exec("php $this->composer install", $output);
-                else
-                    exec("php $this->composer update", $output);
+                if (!file_exists($this->directory . "composer.phar")){
+                    file_put_contents($this->directory . "composer.phar", file_get_contents("http://getcomposer.org/installer"));
+                    $this->log("Installing composer... ");
+                    exec("php composer.phar $action", $output);
+                } else {
+                    $this->log("Running composer... ");
+                    exec("php composer.phar self-update", $output);
+                    exec("php composer.phar $action", $output);
+                }
 
                 $this->log("Composer output: " . implode(' ', $output));
             }
@@ -176,7 +176,7 @@ class Giply
 
         $this->log("Options: " . print_r($options, true), self::LOG_DEBUG);
 
-        $available_options = array('log', 'date_format', 'branch', 'remote', 'composer', 'exec');
+        $available_options = array('log', 'date_format', 'branch', 'remote', 'exec');
 
         foreach ($options as $option => $value) {
             if (in_array($option, $available_options)) {
