@@ -138,16 +138,21 @@ class Giply
 
             if (is_readable($this->directory . "composer.json")) {
                 exec("php $this->composer self-update", $output);
+                $this->log("Running composer... ");
 
                 if (!file_exists($this->directory . "composer.lock"))
                     exec("php $this->composer install", $output);
                 else
                     exec("php $this->composer update", $output);
+
+                $this->log("Composer output: " . implode(' ', $output));
             }
 
             if ($this->exec) {
-                foreach ($this->exec as $exec)
+                foreach ($this->exec as $exec){
+                    $this->log("Executing: $exec", self::LOG_DEBUG);
                     exec($exec, $output);
+                }
             }
 
             if (is_callable($this->post_deploy))
