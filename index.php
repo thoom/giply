@@ -13,7 +13,7 @@ header("Content-Type: text/plain");
 require __DIR__ . "/Giply.php";
 
 $action = $project = $hash = null;
-list($action, $project, $hash) = explode('/', $_SERVER['REQUEST_URI']);
+list($action, $project, $hash) = explode('/', substr($_SERVER['REQUEST_URI'], 1));
 
 if ($action != 'pull') {
     header("400 Invalid action", true, 400);
