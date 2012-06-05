@@ -15,7 +15,7 @@ require __DIR__ . "/Giply.php";
 $action = $project = $hash = null;
 list($action, $project, $hash) = explode('/', substr($_SERVER['REQUEST_URI'], 1));
 
-if ($action != 'pull') {
+if (!in_array($action, array('pull', 'refresh'))) {
     header("400 Invalid action", true, 400);
     exit('Missing action');
 }

@@ -118,14 +118,16 @@ class Giply
                 $output = array();
                 $action = file_exists($this->directory . "composer.lock") ? "update" : "install";
 
-                if (!file_exists($this->directory . "composer.phar")){
-                    file_put_contents($this->directory . "composer.phar", file_get_contents("http://getcomposer.org/installer"));
+                $composer = $this->directory . "composer.phar";
+                if (!file_exists($composer)){
+                    file_put_contents($composer, file_get_contents("http://getcomposer.org/installer"));
                     $this->log("Installing composer... ");
-                    exec("php composer.phar $action", $output);
+                    exec("php $composer $action", $output);
+                    $this->log("Exec: php $composer $action", self::LOG_DEBUG);
                 } else {
                     $this->log("Running composer... ");
-                    exec("php composer.phar self-update", $output);
-                    exec("php composer.phar $action", $output);
+                    exec("php $composer self-update", $output);
+                    exec("php $composer $action", $output);
                 }
 
                 $this->log("Composer output: " . implode(' ', $output));
