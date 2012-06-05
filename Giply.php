@@ -24,12 +24,14 @@ class Giply
     private $composer = '/usr/local/bin/composer.phar';
 
     /**
-     * The name of the file that will be used for logging deployments. Set to
-     * FALSE to disable logging.
+     * The name of the file that will be used for logging deployments. Set to FALSE to disable logging.
      *
      * @var string
      */
     private $log = 'deployments.log';
+
+
+    private $logHandle = null;
 
     /**
      * The timestamp format used for logging.
@@ -68,12 +70,15 @@ class Giply
      * Sets up defaults.
      *
      * @param  string  $directory  Directory where your website is located
-     * @param  array   $data       Information about the deployment
+     * @param  array   $options    Information about the deployment
      */
     public function __construct($directory, $options = array())
     {
         // Determine the directory path
         $this->directory = realpath($directory) . DIRECTORY_SEPARATOR;
+
+        // Log handle to temp so that we don't get overwriting logs.
+        $this->logHandle = fopen('php://temp', 'r+');
 
         $json = $this->directory . "giply.json";
         if (is_readable($json)){
@@ -116,7 +121,7 @@ class Giply
 
             // Write the message into the log file
             // Format: time --- type: message
-            file_put_contents($filename, date($this->date_format) . ' --- ' . $type . ': ' . $message . PHP_EOL, FILE_APPEND);
+            file_put_contents($this->logHandle, date($this->date_format) . ' --- ' . $type . ': ' . $message . PHP_EOL, FILE_APPEND);
         }
     }
 
@@ -169,6 +174,9 @@ class Giply
         } catch (Exception $e) {
             $this->log($e, self::LOG_ERR);
         }
-    }
 
+        if ($this->log){
+            file_put_contents($this->directory . $this->log, stream_get_contents($this->logHandle), FILE_APPEND);
+        }
+    }
 }

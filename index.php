@@ -46,7 +46,18 @@ if (!is_dir("$project_dir/.git")) {
     exit('Invalid project name');
 }
 
+$lock = "$project_dir/giply.lock";
+while (file_exists($lock)){
+    if (md5($_POST['payload']) == file_get_contents($lock))
+       exit();
+
+    sleep(2);
+}
+
+file_put_contents($lock, md5($_POST['payload']));
 $deploy = new Giply($project_dir);
+
+
 $deploy->log("Payload: " . $_POST['payload'], Giply::LOG_DEBUG);
 
 //$deploy->post_deploy = function() use ($deploy) {
@@ -54,3 +65,4 @@ $deploy->log("Payload: " . $_POST['payload'], Giply::LOG_DEBUG);
 //};
 
 $deploy->execute();
+unset($lock);
