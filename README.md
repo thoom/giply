@@ -12,8 +12,25 @@ Class: Giply.php
 
 This class does all of the work pulling the latest data from the Git repo. It will look for a __giply.json__ file in the
 project's working directory to overwrite any of the default variables. Additionally, if a __composer.json__ file exists
-in the project's working directory, the class will attempt to run the composer.phar file (it assumes that the the phar is
-located in the _/usr/local/bin_ directory).
+in the project's working directory, the class will attempt to download (if it's not already in the working directory)
+and run the composer.phar file.
+
+### giply.json
+This JSON-based configuration file can overwrite basic information such as the log name, and can include an array
+of executable strings that will be run after the git repo has been updated and composer has been run. For example,
+you could remove a cache directory and re-add it.
+
+    {
+        "post_exec": [
+            "rm -rf cache",
+            "mkdir cache",
+            "chmod 777 cache"
+        ]
+    }
+
+####Note
+All of the post_exec scripts are run through PHP's exec command, so any php scripts would be run from the command-line and
+are not **include**'d in the script itself.
 
 Server: index.php
 -----------------
@@ -26,6 +43,15 @@ The server expects pretty URLs, in the format: __action/projectName/securityHash
 is _pull_. The other options: _projectName_ is the name of the working directory (in your /var/www folder). The security
 hash is a simple md5 hash of the string _/var/www/projectName_. Other hashes may be supported in future revisions, and
 it is really only there to add a little bit of simple security.
+
+So an example of a POST url for Bitbucket or Github for my server:
+
+    http://deploy.mysite.com/pull/mysite/ff56634640221a6b2716d276361162cd
+
+The server script is built around projects that I have on Github and Bitbucket. Both of these providers POST to the server
+with a json string to the _payload_ key. The server stores the JSON string in a file: **giply_payload.json**. This provides
+any of the *post_exec* scripts access to the payload data for processing.
+
 
 References
 ----------

@@ -46,7 +46,7 @@ if (!is_dir("$project_dir/.git")) {
     exit('Invalid project name');
 }
 
-$lock = "$project_dir/giply.lock";
+$lock = "$project_dir/giply_process.lock";
 
 set_time_limit(120);
 $timeout = 60;
@@ -70,7 +70,7 @@ register_shutdown_function(function() use ($lock)
 });
 
 file_put_contents($lock, md5($_POST['payload']));
-file_put_contents("$project_dir/payload.json", $_POST['payload']);
+file_put_contents("$project_dir/giply_payload.json", $_POST['payload']);
 
 $deploy = new Giply($project_dir);
 $deploy->log("Payload: " . $_POST['payload'], Giply::LOG_DEBUG);
