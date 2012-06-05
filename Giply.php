@@ -75,8 +75,10 @@ class Giply
         // Determine the directory path
         $this->directory = realpath($directory) . DIRECTORY_SEPARATOR;
 
-        if (is_readable($this->directory . "giply.json"))
-            $options = array_merge(json_decode(file_get_contents($this->directory . "Giply.json")), $options);
+        $json = $this->directory . "giply.json";
+        if (is_readable($json)){
+            $options = array_merge(json_decode(file_get_contents($json)), $options);
+        }
 
         $available_options = array('log', 'date_format', 'branch', 'remote', 'composer', 'exec');
 
