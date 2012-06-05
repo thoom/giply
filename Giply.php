@@ -63,7 +63,6 @@ class Giply
      */
     private $directory;
 
-
     private $exec;
 
     /**
@@ -80,21 +79,7 @@ class Giply
         // Log handle to temp so that we don't get overwriting logs.
         $this->logHandle = fopen('php://temp', 'r+');
 
-        $json = $this->directory . "giply.json";
-        if (is_readable($json)){
-            $this->log("Overwriting default options", self::LOG_DEBUG);
-            $options = array_merge(json_decode(file_get_contents($json), true), $options);
-        }
-
-        $this->log("Options: " . print_r($options, true), self::LOG_DEBUG);
-
-        $available_options = array('log', 'date_format', 'branch', 'remote', 'composer', 'exec');
-
-        foreach ($options as $option => $value) {
-            if (in_array($option, $available_options)) {
-                $this->$option = $value;
-            }
-        }
+        $this->overwriteOptions($options);
 
         $this->log('Attempting deployment...');
     }
@@ -107,11 +92,9 @@ class Giply
      */
     public function log($message, $type = self::LOG_INFO)
     {
-        if ($this->log) {
-            // Write the message into the temp log file
-            // Format: time --- type: message
-            fwrite($this->logHandle, date($this->date_format) . ' --- ' . $type . ': ' . $message . PHP_EOL);
-        }
+        // Write the message into the temp log file
+        // Format: time --- type: message
+        fwrite($this->logHandle, date($this->date_format) . ' --- ' . $type . ': ' . $message . PHP_EOL);
     }
 
     /**
@@ -133,6 +116,7 @@ class Giply
             exec('git pull ' . $this->remote . ' ' . $this->branch, $output);
             $this->log('Pulling in changes... ' . implode(' ', $output));
 
+            $this->overwriteOptions();
             if (is_readable($this->directory . "composer.json")) {
                 $output = array();
                 exec("php $this->composer self-update", $output);
@@ -149,7 +133,7 @@ class Giply
 
             if ($this->exec) {
 
-                foreach ($this->exec as $exec){
+                foreach ($this->exec as $exec) {
                     $this->log("Executing ($i): $exec", self::LOG_DEBUG);
                     exec($exec);
                     $i++;
@@ -164,7 +148,7 @@ class Giply
             $this->log($e, self::LOG_ERR);
         }
 
-        if ($this->log){
+        if ($this->log) {
             $filename = $this->directory . $this->log;
 
             if (!file_exists($filename)) {
@@ -178,6 +162,26 @@ class Giply
             fseek($this->logHandle, 0);
             file_put_contents($filename, stream_get_contents($this->logHandle), FILE_APPEND);
             fclose($this->logHandle);
+        }
+    }
+
+
+    private function overwriteOptions($options = array())
+    {
+        $json = $this->directory . "giply.json";
+        if (is_readable($json)) {
+            $this->log("Overwriting default options", self::LOG_DEBUG);
+            $options = array_merge(json_decode(file_get_contents($json), true), $options);
+        }
+
+        $this->log("Options: " . print_r($options, true), self::LOG_DEBUG);
+
+        $available_options = array('log', 'date_format', 'branch', 'remote', 'composer', 'exec');
+
+        foreach ($options as $option => $value) {
+            if (in_array($option, $available_options)) {
+                $this->$option = $value;
+            }
         }
     }
 }
