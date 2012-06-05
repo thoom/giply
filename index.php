@@ -64,7 +64,6 @@ while (file_exists($lock)) {
     }
 }
 
-
 file_put_contents($lock, md5($_POST['payload']));
 $deploy = new Giply($project_dir);
 
