@@ -108,20 +108,9 @@ class Giply
     public function log($message, $type = self::LOG_INFO)
     {
         if ($this->log) {
-            // Set the name of the log file
-            $filename = $this->directory . $this->log;
-
-            if (!file_exists($filename)) {
-                // Create the log file
-                file_put_contents($filename, '');
-
-                // Allow anyone to write to log files
-                chmod($filename, 0666);
-            }
-
-            // Write the message into the log file
+            // Write the message into the temp log file
             // Format: time --- type: message
-            file_put_contents($this->logHandle, date($this->date_format) . ' --- ' . $type . ': ' . $message . PHP_EOL, FILE_APPEND);
+            fwrite($this->logHandle, date($this->date_format) . ' --- ' . $type . ': ' . $message . PHP_EOL);
         }
     }
 
@@ -176,7 +165,19 @@ class Giply
         }
 
         if ($this->log){
-            file_put_contents($this->directory . $this->log, stream_get_contents($this->logHandle), FILE_APPEND);
+            $filename = $this->directory . $this->log;
+
+            if (!file_exists($filename)) {
+                // Create the log file
+                file_put_contents($filename, '');
+
+                // Allow anyone to write to log files
+                chmod($filename, 0666);
+            }
+
+            fseek($this->logHandle, 0);
+            file_put_contents($filename, stream_get_contents($this->logHandle), FILE_APPEND);
+            fclose($this->logHandle);
         }
     }
 }
