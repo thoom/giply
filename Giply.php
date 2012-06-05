@@ -78,7 +78,7 @@ class Giply
         $json = $this->directory . "giply.json";
         if (file_exists($json)){
             $this->log("Overwriting default options", self::LOG_DEBUG);
-            $options = array_merge(json_decode(file_get_contents($json)), $options);
+            $options = array_merge(json_decode(file_get_contents($json), true), $options);
         }
 
         $this->log("Options: " . print_r($options, true), self::LOG_DEBUG);
