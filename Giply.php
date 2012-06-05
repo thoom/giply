@@ -76,7 +76,7 @@ class Giply
         $this->directory = realpath($directory) . DIRECTORY_SEPARATOR;
 
         $json = $this->directory . "giply.json";
-        if (file_exists($json)){
+        if (is_readable($json)){
             $this->log("Overwriting default options", self::LOG_DEBUG);
             $options = array_merge(json_decode(file_get_contents($json), true), $options);
         }
@@ -128,6 +128,7 @@ class Giply
         try {
             // Make sure we're in the right directory
             chdir($this->directory);
+            $i = 1;
 
             // Discard any changes to tracked files since our last deploy
             exec('git reset --hard HEAD', $output);
@@ -137,11 +138,6 @@ class Giply
             $output = array();
             exec('git pull ' . $this->remote . ' ' . $this->branch, $output);
             $this->log('Pulling in changes... ' . implode(' ', $output));
-
-            // Secure the .git directory
-            $output = array();
-            exec('chmod -R og-rx .git', $output);
-            $this->log('Securing .git directory... ');
 
             if (is_readable($this->directory . "composer.json")) {
                 $output = array();
@@ -158,10 +154,11 @@ class Giply
             }
 
             if ($this->exec) {
+
                 foreach ($this->exec as $exec){
-                    $output = array();
-                    $this->log("Executing: $exec", self::LOG_DEBUG);
-                    exec($exec, $output);
+                    $this->log("Executing ($i): $exec", self::LOG_DEBUG);
+                    exec($exec);
+                    $i++;
                 }
             }
 
