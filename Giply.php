@@ -159,6 +159,7 @@ class Giply
 
             if ($this->exec) {
                 foreach ($this->exec as $exec){
+                    $output = array();
                     $this->log("Executing: $exec", self::LOG_DEBUG);
                     exec($exec, $output);
                 }
