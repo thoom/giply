@@ -46,7 +46,7 @@ it is really only there to add a little bit of simple security.
 
 So an example of a POST url for Bitbucket or Github for my server:
 
-    http://deploy.mysite.com/pull/mysite/ff56634640221a6b2716d276361162cd
+    http://deploy.myserver.com/pull/mysite/ff56634640221a6b2716d276361162cd
 
 The server script is built around projects that I have on Github and Bitbucket. Both of these providers POST to the server
 with a json string to the _payload_ key. The server stores the JSON string in a file: **giply_payload.json**. This provides
