@@ -1,0 +1,22 @@
+{
+    "name":"thoom/giply",
+    "description":"PHP git-based deployment",
+    "type":"library",
+    "keywords":["git", "deployment"],
+    "homepage":"https://github.com/thoom/Giply",
+    "license":"MIT",
+    "require":{
+        "php":">=5.3.2"
+    },
+    "autoload":{
+        "psr-0":{
+            "Thoom":"lib/"
+        }
+    },
+    "authors":[
+        {
+            "name":"Z.d. Peacock",
+            "email":"zdp@thoomtech.com"
+        }
+    ]
+}

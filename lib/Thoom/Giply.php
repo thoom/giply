@@ -7,6 +7,8 @@
  *
  */
 
+namespace Thoom;
+
 class Giply
 {
     const LOG_DEBUG = 'DEBUG';
@@ -117,7 +119,6 @@ class Giply
             $this->overwriteOptions();
             if (is_readable($this->directory . "composer.json")) {
                 $output = array();
-                $action = file_exists($this->directory . "composer.lock") ? "update" : "install";
 
                 $composer = $this->directory . "composer.phar";
                 while (!file_exists($composer)) {
@@ -127,7 +128,7 @@ class Giply
 
                 $this->log("Running composer... ");
                 exec("php $composer self-update", $output);
-                exec("php $composer $action", $output);
+                exec("php $composer install", $output);
 
                 $this->log("Composer output: " . implode(' ', $output));
             }
@@ -141,7 +142,7 @@ class Giply
             }
 
             $this->log('Deployment successful.');
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->log($e, self::LOG_ERR);
         }
 
