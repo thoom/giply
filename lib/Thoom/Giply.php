@@ -127,6 +127,7 @@ class Giply
                 }
 
                 $this->log("Running composer... ");
+                exec('rm -rf vendor'); //Remove the vendor directory since it continually has problems updating it
                 exec("php $composer self-update", $output);
                 exec("php $composer install", $output);
 
