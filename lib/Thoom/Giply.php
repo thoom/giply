@@ -131,7 +131,7 @@ class Giply
                 exec("php $composer self-update", $output);
                 exec("php $composer install", $output);
 
-                $this->log("Composer output: " . implode(' ', $output));
+                $this->log("Composer output: " . implode("\n", $output));
             }
 
             if ($this->post_exec) {
@@ -159,7 +159,7 @@ class Giply
             }
 
             fseek($this->logHandle, 0);
-            file_put_contents($filename, stream_get_contents($this->logHandle), FILE_APPEND);
+            file_put_contents($filename, stream_get_contents($this->logHandle));
             fclose($this->logHandle);
         }
     }
@@ -172,8 +172,6 @@ class Giply
             $this->log("Overwriting default options", self::LOG_DEBUG);
             $options = array_merge(json_decode(file_get_contents($json), true), $options);
         }
-
-        $this->log("Options: " . print_r($options, true), self::LOG_DEBUG);
 
         $available_options = array('log', 'date_format', 'branch', 'remote', 'post_exec');
 
