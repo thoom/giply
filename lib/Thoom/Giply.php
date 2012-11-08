@@ -193,7 +193,7 @@ class Giply
 
         foreach ($options as $option => $value) {
             if (in_array($option, $available_options)) {
-                $this->$option = $value;
+                $this->$option = is_array($value)? array_merge($this->$option, $value) : $value;
             }
         }
     }
