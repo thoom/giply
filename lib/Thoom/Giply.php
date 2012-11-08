@@ -12,8 +12,8 @@ namespace Thoom;
 class Giply
 {
     const LOG_DEBUG = 'DEBUG';
-    const LOG_ERR = 'ERROR';
-    const LOG_INFO = 'INFO';
+    const LOG_ERR   = 'ERROR';
+    const LOG_INFO  = 'INFO';
 
     /**
      * The name of the file that will be used for logging deployments. Set to FALSE to disable logging.
@@ -57,6 +57,14 @@ class Giply
      * @var string
      */
     private $directory;
+
+
+    private $composer = array(
+        'vendors' => 'clean',
+        'command' => 'install',
+        'source'  => 'dist',
+        'flags'   => '-o',
+    );
 
     /**
      * List of executable commands to be run after the repo has been updated
@@ -127,9 +135,17 @@ class Giply
                 }
 
                 $this->log("Running composer... ");
-                exec('rm -rf vendor'); //Remove the vendor directory since it continually has problems updating it
+
+                if ($this->composer['vendors'] == 'clean') {
+                    exec('rm -rf vendor'); //Remove the vendor directory since it continually has problems updating it
+
+                }
+
                 exec("php $composer self-update", $output);
-                exec("php $composer install", $output);
+                exec(
+                    "php $composer " . $this->composer['command'] . " --prefer-" . $this->composer['source'] . " " . $this->composer['flags'],
+                    $output
+                );
 
                 $this->log("Composer output: " . implode("\n", $output));
             }
@@ -173,7 +189,7 @@ class Giply
             $options = array_merge(json_decode(file_get_contents($json), true), $options);
         }
 
-        $available_options = array('log', 'date_format', 'branch', 'remote', 'post_exec');
+        $available_options = array('log', 'date_format', 'branch', 'remote', 'composer', 'post_exec');
 
         foreach ($options as $option => $value) {
             if (in_array($option, $available_options)) {
